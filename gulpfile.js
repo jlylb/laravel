@@ -12,11 +12,10 @@ require('laravel-elixir-vue-2');
  | file for your application as well as publishing vendor resources.
  |
  */
-elixir(function(mix) {
-    mix.copy('node_modules/element-ui/packages/theme-chalk/src/fonts/', 'public/fonts/');
-});
+
 
 elixir((mix) => {
-    mix.sass('app.scss')
-       .webpack('app.js');
+    //mix.sass('app.scss')
+    mix.webpack('app.js');
+    mix.copy('node_modules/element-ui/packages/theme-chalk/src/fonts/', 'public/fonts/');
 });

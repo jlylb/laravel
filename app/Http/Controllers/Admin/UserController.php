@@ -13,9 +13,14 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users=  \App\User::orderBy('created_at','desc')->paginate(15);
+        $pageSize=$request->input('per_page',15);
+        $page=$request->input('current_page',1);
+        $users=  \App\User::orderBy('created_at','desc')
+                    ->paginate($pageSize)
+                    ->offset($page);
+        return response()->json($users);
         return view('admin.user.index', compact('users'));
     }
 

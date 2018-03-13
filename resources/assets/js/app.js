@@ -18,6 +18,8 @@ Vue.use(ElementUI);
 
 Vue.component('example', require('./components/Example.vue'));
 
+Vue.component('user', require('./components/User.vue'));
+
 const app = new Vue({
     el: '#app'
 });
