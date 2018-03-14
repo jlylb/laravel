@@ -16,10 +16,17 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $pageSize=$request->input('per_page',15);
+<<<<<<< HEAD
         $page=$request->input('page',1);
         $users=  \App\User::orderBy('created_at','desc')
                     ->offset($page)
                     ->paginate($pageSize);
+=======
+        $page=$request->input('current_page',1);
+        $users=  \App\User::orderBy('created_at','desc')
+                    ->paginate($pageSize)
+                    ->offset($page);
+>>>>>>> cb5348e8440f3d4fd8dee111fa0d9575820471bb
         return response()->json($users);
         return view('admin.user.index', compact('users'));
     }
