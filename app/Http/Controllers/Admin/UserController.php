@@ -124,8 +124,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user = App\User::find($id);
-        $user->delete();
+        $user = \App\User::find($id);
+        return $user->delete()?'ok':'fail';
         return redirect('admin/user');
     }
 }

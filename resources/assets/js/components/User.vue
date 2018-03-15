@@ -1,15 +1,79 @@
 <template>
 <div>
-    <el-table :data="tableData" style="width: 100%">
+  <el-button type="primary" @click="dialogFormVisible  = true">添加</el-button>
 
-      <el-table-column prop="created_at" label="创建日期" width="180"></el-table-column>
+ <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
+  <el-form :model="form" status-icon>
+    <el-form-item label="用户名称" :label-width="formLabelWidth">
+      <el-input v-model="form.name" auto-complete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="用户邮箱" :label-width="formLabelWidth">
+      <el-input v-model="form.email" auto-complete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="用户密码" :label-width="formLabelWidth">
+      <el-input type="password" v-model="form.password" auto-complete="off"></el-input>
+    </el-form-item>
+        <el-form-item label="确认密码" :label-width="formLabelWidth">
+      <el-input type="password" v-model="form.passwordCompare" auto-complete="off"></el-input>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="dialogFormVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+  </div>
+</el-dialog>
 
-      <el-table-column prop="updated_at" label="更新日期" width="180"></el-table-column>
+    <el-table 
+    :data="tableData" 
+    style="width: 100%" 
+    @selection-change="handleSelectionChange"
+    :default-sort = "{prop: 'created_at', order: 'descending'}">
 
-      <el-table-column prop="name" label="姓名" width="180"></el-table-column>
+    <el-table-column type="expand">
+      <template slot-scope="props">
+        <el-form label-position="left" inline class="demo-table-expand">
+          <el-form-item label="创建日期">
+            <span>{{ props.row.created_at }}</span>
+          </el-form-item>
+          <el-form-item label="更新日期">
+            <span>{{ props.row.updated_at }}</span>
+          </el-form-item>
+          <el-form-item label="姓名">
+            <span>{{ props.row.name }}</span>
+          </el-form-item>
+          <el-form-item label="邮箱">
+            <span>{{ props.row.email }}</span>
+          </el-form-item>
+        </el-form>
+      </template>
+    </el-table-column>
 
-      <el-table-column prop="email" label="邮箱"></el-table-column>
+    <el-table-column
+      type="selection"
+      width="55">
+    </el-table-column>
+    <el-table-column prop="id" label="编号" sortable></el-table-column>
+      <el-table-column prop="created_at" label="创建日期" sortable></el-table-column>
 
+      <el-table-column prop="updated_at" label="更新日期" sortable></el-table-column>
+
+      <el-table-column prop="name" label="姓名" ></el-table-column>
+
+      <el-table-column prop="email" label="邮箱"  sortable></el-table-column>
+    <el-table-column
+      fixed="right"
+      label="操作">
+      <template slot-scope="scope">
+        <el-button
+          size="mini"
+          type="success"
+          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+        <el-button
+          size="mini"
+          type="danger"
+          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+      </template>
+    </el-table-column>
     </el-table>
     
     <el-pagination
@@ -37,7 +101,20 @@ export default {
       //当前页码
       currentPage: 1,
       //默认数据总数
-      totalCount: 0
+      totalCount: 0,
+
+      dialogFormVisible: false,
+
+      form: {
+        name: "",
+        email: "",
+        password: "",
+        passwordCompare: "",
+      },
+
+      formLabelWidth: "120px",
+
+      multipleSelection: []
     };
   },
   mounted: function() {},
@@ -51,14 +128,46 @@ export default {
           params: { page: this.currentPage, per_page: this.pagesize }
         })
         .then(res => {
-
           this.tableData = res.body.data || [];
-          
-          this.totalCount = res.body.total;
 
+          this.totalCount = res.body.total;
         });
     },
-
+    handleEdit(index, row) {
+      console.log(index, row);
+    },
+    handleDelete(index, row) {
+      console.log(index, row);
+      this.$confirm("是否确认删除?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$http
+            .delete("/admin/user/" + row.id, {
+              emulateJSON: true
+            })
+            .then(
+              function(res) {
+                this.getData();
+                this.$message({
+                  type: "success",
+                  message: "删除成功!"
+                });
+              },
+              function() {
+                console.log("failed");
+              }
+            );
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
     //每页显示数据量变更
     handleSizeChange: function(val) {
       this.pagesize = val;
@@ -69,6 +178,16 @@ export default {
     handleCurrentChange: function(val) {
       this.currentPage = val;
       this.getData();
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    handleClose(done) {
+      this.$confirm("确认关闭？")
+        .then(_ => {
+          done();
+        })
+        .catch(_ => {});
     }
   }
 };
