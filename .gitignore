@@ -12,3 +12,4 @@ Homestead.yaml
 /public/css
 /public/js/*.js
 /public/fonts
+public/js/app.js
