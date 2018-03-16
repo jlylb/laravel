@@ -1,28 +1,54 @@
 <template>
+
 <div>
+
   <el-button type="primary" @click="dialogFormVisible  = true">添加</el-button>
 
- <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
-  <el-form :model="form" status-icon>
-    <el-form-item label="用户名称" :label-width="formLabelWidth">
-      <el-input v-model="form.name" auto-complete="off"></el-input>
+ <el-dialog title="添加用户" :visible.sync="dialogFormVisible" center>
+
+  <el-form :model="ruleform1" status-icon :rules="rules" ref="ruleform1">
+
+    <el-form-item label="用户名称" :label-width="formLabelWidth" prop="name">
+      <el-input v-model="ruleform1.name" auto-complete="off"></el-input>
     </el-form-item>
-    <el-form-item label="用户邮箱" :label-width="formLabelWidth">
-      <el-input v-model="form.email" auto-complete="off"></el-input>
+
+    <el-form-item label="用户邮箱" :label-width="formLabelWidth"  prop="email">
+      <el-input v-model="ruleform1.email" auto-complete="off"></el-input>
     </el-form-item>
-    <el-form-item label="用户密码" :label-width="formLabelWidth">
-      <el-input type="password" v-model="form.password" auto-complete="off"></el-input>
+
+    <el-form-item label="用户密码" :label-width="formLabelWidth" prop="password">
+      <el-input type="password" v-model="ruleform1.password" auto-complete="off"></el-input>
     </el-form-item>
-        <el-form-item label="确认密码" :label-width="formLabelWidth">
-      <el-input type="password" v-model="form.passwordCompare" auto-complete="off"></el-input>
+
+    <el-form-item label="确认密码" :label-width="formLabelWidth" prop="passwordCompare">
+      <el-input type="password" v-model="ruleform1.passwordCompare" auto-complete="off"></el-input>
     </el-form-item>
+    
   </el-form>
+
   <div slot="footer" class="dialog-footer">
     <el-button @click="dialogFormVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+    <el-button type="primary" @click="submitForm('ruleform1')">确 定</el-button>
   </div>
+
 </el-dialog>
 
+<el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+  <el-form-item label="密码" prop="pass">
+    <el-input type="password" v-model="ruleForm2.pass" auto-complete="off"></el-input>
+  </el-form-item>
+  <el-form-item label="确认密码" prop="checkPass">
+    <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off"></el-input>
+  </el-form-item>
+  <el-form-item label="年龄" prop="age">
+    <el-input v-model.number="ruleForm2.age"></el-input>
+  </el-form-item>
+  <el-form-item>
+    <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
+    <el-button @click="resetForm('ruleForm2')">重置</el-button>
+  </el-form-item>
+</el-form>
+ 
     <el-table 
     :data="tableData" 
     style="width: 100%" 
@@ -92,7 +118,58 @@
 <script>
 export default {
   data() {
+    var validatePass2 = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("请再次输入密码"));
+      } else if (value !== this.form.passwordCompare) {
+        callback(new Error("两次输入密码不一致!"));
+      } else {
+        callback();
+      }
+    };
+          var checkAge = (rule, value, callback) => {
+        if (!value) {
+          return callback(new Error('年龄不能为空'));
+        }
+        setTimeout(() => {
+          if (!Number.isInteger(value)) {
+            callback(new Error('请输入数字值'));
+          } else {
+            if (value < 18) {
+              callback(new Error('必须年满18岁'));
+            } else {
+              callback();
+            }
+          }
+        }, 1000);
+      };
+      var validatePass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        } else {
+          if (this.ruleForm2.checkPass !== '') {
+            this.$refs.ruleForm2.validateField('checkPass');
+          }
+          callback();
+        }
+      };
     return {
+              ruleForm2: {
+          pass: '',
+          checkPass: '',
+          age: ''
+        },
+        rules2: {
+          pass: [
+            { validator: validatePass, trigger: 'blur' }
+          ],
+          checkPass: [
+            { validator: validatePass2, trigger: 'blur' }
+          ],
+          age: [
+            { validator: checkAge, trigger: 'blur' }
+          ]
+        },
       tableData: [],
       //请求的URL
       url: "/admin/user",
@@ -105,13 +182,32 @@ export default {
 
       dialogFormVisible: false,
 
-      form: {
+      ruleform1: {
         name: "",
         email: "",
         password: "",
-        passwordCompare: "",
+        passwordCompare: ""
       },
-
+      rules: {
+        name: [
+          { required: true, message: "请输入用户名称", trigger: "blur" },
+          { min: 6, max: 30, message: "长度在 6 到 30 个字符", trigger: "blur" }
+        ],
+        email: [
+          {
+            type: "email",
+            required: true,
+            message: "请输入用户邮箱",
+            trigger: "blur"
+          }
+        ],
+        password: [
+          { required: true, message: "请输入用户密码", trigger: "blur" }
+        ],
+        passwordCompare: [
+          { validator: validatePass2, trigger: "blur" }
+        ]
+      },
       formLabelWidth: "120px",
 
       multipleSelection: []
@@ -122,6 +218,7 @@ export default {
     this.getData();
   },
   methods: {
+    
     getData: function() {
       this.$http
         .get(this.url, {
@@ -188,7 +285,23 @@ export default {
           done();
         })
         .catch(_ => {});
-    }
+    },
+    submitForm:function(formName) {
+      console.log(formName,this.$refs[formName].validate);
+      console.log(this.$refs[formName]);return;
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          alert("submit!");
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    resetForm:function(formName) {
+        this.$refs[formName].resetFields();
+      }
+    
   }
 };
 </script>

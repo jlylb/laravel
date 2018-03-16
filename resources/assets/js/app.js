@@ -13,8 +13,10 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 import ElementUI from 'element-ui';
+//import Vuex from 'vuex'
 
 Vue.use(ElementUI);
+//Vue.use(Vuex);
 
 Vue.component('example', require('./components/Example.vue'));
 
