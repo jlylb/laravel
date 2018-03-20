@@ -2,7 +2,7 @@
 
 <div>
 
-  <el-button type="primary" @click="dialogFormVisible  = true">添加</el-button>
+  <el-button type="primary" @click="handleOpen">添加</el-button>
 
  <el-dialog title="添加用户" :visible.sync="dialogFormVisible" center>
 
@@ -33,22 +33,6 @@
 
 </el-dialog>
 
-<el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
-  <el-form-item label="密码" prop="pass">
-    <el-input type="password" v-model="ruleForm2.pass" auto-complete="off"></el-input>
-  </el-form-item>
-  <el-form-item label="确认密码" prop="checkPass">
-    <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off"></el-input>
-  </el-form-item>
-  <el-form-item label="年龄" prop="age">
-    <el-input v-model.number="ruleForm2.age"></el-input>
-  </el-form-item>
-  <el-form-item>
-    <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
-    <el-button @click="resetForm('ruleForm2')">重置</el-button>
-  </el-form-item>
-</el-form>
- 
     <el-table 
     :data="tableData" 
     style="width: 100%" 
@@ -231,7 +215,15 @@ export default {
         });
     },
     handleEdit(index, row) {
-      console.log(index, row);
+      console.log(index, row); 
+      this.dialogFormVisible=true; 
+      _.extend(this.ruleform1,row);          
+    },
+    handleOpen() {
+      _.forEach(this.ruleform1, (value, key) =>{
+        this.ruleform1[key]='';
+      });
+      this.dialogFormVisible=true;          
     },
     handleDelete(index, row) {
       console.log(index, row);
