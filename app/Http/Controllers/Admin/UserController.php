@@ -52,6 +52,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        return response()->json(['name'=>'name error','email'=>'email error']);
         $data=$request->all();
         $this->validator($data)->validate();
 
